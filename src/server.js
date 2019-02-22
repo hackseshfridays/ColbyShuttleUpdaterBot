@@ -1,7 +1,12 @@
 const bodyParser = require('body-parser');
 const express = require('express')
 const {receive_message} = require('./twilio');
+const {initUpdateLoop} = require('./update_loop');
 
+// constants
+const SECONDS = 1000;
+
+// vars for server
 const app = express()
 const port = 3000 || process.env.PORT;
 
@@ -18,11 +23,14 @@ app.use(function(req, res, next) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
 // receive and respond to twilio messages
 app.post('/message', async (req, res) => {
   receive_message(req.body);
   res.send('Ok');
 });
+
+// launch the app
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+// start the loop and set to every five seconds
+initUpdateLoop(5 * SECONDS);
