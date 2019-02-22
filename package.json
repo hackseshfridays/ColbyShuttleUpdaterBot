@@ -1,5 +1,5 @@
 {
-  "name": "ColbyShuttleUpdaterBot",
+  "name": "colbyshuttleupdaterbot",
   "version": "0.0.1",
   "description": "automated update service for Colby Shuttle",
   "main": "index.js",
@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "ColbyShuttleSdk": "https://github.com/hackseshfridays/ColbyShuttleSdk.git",
+    "maverick": "https://github.com/hackseshfridays/maverick.git",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "twilio": "^3.28.1"
