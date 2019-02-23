@@ -1,3 +1,11 @@
+/*
+  Functionality responsible for determining the content and type of received
+  Twilio messages.
+
+  Disrupt Colby 2019
+  Author(s): robertDurst
+*/
+
 // aparently this is how you define enums in js
 // https://stackoverflow.com/questions/287903/what-is-the-preferred-syntax-for-defining-enums-in-javascript
 const messageType = Object.freeze({

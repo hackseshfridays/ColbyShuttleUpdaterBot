@@ -1,8 +1,12 @@
-let createPerson =
-    function(phoneNumber, location) {
-  let person = {phoneNumber, location};
+/*
+  Description of the person (user) class and a factory method for returning
+  person objects.
 
-  return person;
-}
+  Disrupt Colby 2019
+  Author(s): jmanyc, robertDurst
+*/
 
-    module.exports = {createPerson}
+// create and return a new person object
+const createPerson = (phoneNumber, location) => ({phoneNumber, location});
+
+module.exports = {createPerson}

@@ -1,3 +1,11 @@
+/*
+  All the logic and associated, useful for functionality for the main event
+  loop, a loop that keeps track of and calculates the eta for the shuttle(s) to
+  each route stop.
+
+  Disrupt Colby 2019
+  Author(s): robertDurst
+*/
 const {getMapStopEstimates, getShuttleLocation} = require('maverick');
 const {STOPS, ALFOND_COMMONS, DAVIS, DIAMOND, COTTER, OUT_OF_SERVICE} =
     require('./constants');
@@ -66,7 +74,6 @@ const initUpdateLoop = (interval, callback) => {
       bus.RouteStops.forEach(stop => {
         let curFastest;
         let estimatedTimeForBus;
-
 
         switch (stop.Description) {
           case 'Alfond Commons':
