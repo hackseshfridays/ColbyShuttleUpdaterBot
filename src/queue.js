@@ -6,9 +6,13 @@ let buildQueue =
 }
 
 
-let addToQueue = function(q, person) {
-  q.push(person);
-
+let addToQueue = function(q, p) {
+  if (q.filter(person => person.phoneNumber == p.phoneNumber).length !== 0) {
+    let index = q.indexOf(q.find(o => o.phoneNumber === p.phoneNumber));
+    q[index].location = p.location;
+  } else {
+    q.push(p);
+  }
   return q;
 };
 
