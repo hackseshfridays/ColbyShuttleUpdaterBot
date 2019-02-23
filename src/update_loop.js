@@ -1,28 +1,62 @@
-const {getMapStopEstimates} = require('maverick');
+const {getMapStopEstimates, getShuttleLocation} = require('maverick');
 const {STOPS, ALFOND_COMMONS, DAVIS, DIAMOND, COTTER, OUT_OF_SERVICE} =
     require('./constants');
 
-let busTimeEstimateState = initLoopDataStructure();
+// state of the shuttle stops with:
+//  eta: time to arrival of closest shuttle
+//  ticks: seconds * 5 since last event/update (rests on arrival)
+let busTimeEstimateState = {};
 
 // get the loop structure
-const getEstimatesState = () => busTimeEstimateState;
+const getEstimateForStop = stop => busTimeEstimateState[stop].eta.time;
 
 // returns the data structure for keeping track of the ETA to each stop
 const initLoopDataStructure = () => {
   const loopStructure = {};
 
   STOPS.forEach(stop => {
-    loopStructure[stop] = OUT_OF_SERVICE;
+    loopStructure[stop] = {eta: {time: OUT_OF_SERVICE, bus: 0}, ticks: 0};
   });
 
   return loopStructure;
 };
 
+// adjust the ticks for a given loop iteration
+const updateTicks =
+    () => {
+      // capture arriving buses
+      const stopNotifications = {arriving: [], toUpdate: []};
+
+      STOPS.forEach(stop => {
+        const curStop = busTimeEstimateState[stop];
+
+        // within a minute of arriving and slowing down
+        if (curStop.eta.time < 60 && curStop.ticks != -1) {
+          // add to arrving array and reset ticks
+          stopNotifications.arriving.push(stop);
+          curStop.ticks = -1;
+        } else if (curStop.ticks == 12) {
+          stopNotifications.toUpdate.push(stop);
+          curStop.ticks = 0;
+          // just departed
+        } else {
+          curStop.ticks++;
+        }
+      });
+
+      return stopNotifications;
+    }
+
+
 // starts a loop that will run forever
-const initUpdateLoop = interval => {
+const initUpdateLoop = (interval, callback) => {
+  // initialize the bus estimates state
+  busTimeEstimateState = initLoopDataStructure();
+
   setInterval(async () => {
-    // create new data structure since we are only using pure functions
-    const loopStructure = initLoopDataStructure();
+    // copy the global state
+    const loopStructure = busTimeEstimateState;
+
     // get latest estimates
     const estimates = await getMapStopEstimates();
 
@@ -33,51 +67,64 @@ const initUpdateLoop = interval => {
         let curFastest;
         let estimatedTimeForBus;
 
+
         switch (stop.Description) {
           case 'Alfond Commons':
-            curFastest = loopStructure[STOPS[ALFOND_COMMONS]];
+            curFastest = loopStructure[STOPS[ALFOND_COMMONS]].eta.time;
             estimatedTimeForBus = stop.Estimates[0].SecondsToStop;
-
-            if (curFastest > estimatedTimeForBus) {
-              loopStructure[STOPS[ALFOND_COMMONS]] = estimatedTimeForBus;
+            if (loopStructure[STOPS[ALFOND_COMMONS]].ticks == -1 ||
+                curFastest > estimatedTimeForBus) {
+              loopStructure[STOPS[ALFOND_COMMONS]].eta.time =
+                  estimatedTimeForBus;
+              loopStructure[STOPS[ALFOND_COMMONS]].eta.bus =
+                  stop.Estimates[0].VehicleID;
             }
             break;
           // intentially bleed through here since the following are
           // equivalent
           case 'Davis':
           case 'Bixler and Davis':
-            curFastest = loopStructure[STOPS[DAVIS]];
+            curFastest = loopStructure[STOPS[DAVIS]].eta.time;
             estimatedTimeForBus = stop.Estimates[0].SecondsToStop;
 
-            if (curFastest > estimatedTimeForBus) {
-              loopStructure[STOPS[DAVIS]] = estimatedTimeForBus;
+            if (loopStructure[STOPS[DAVIS]].ticks == -1 ||
+                curFastest > estimatedTimeForBus) {
+              loopStructure[STOPS[DAVIS]].eta.time = estimatedTimeForBus;
+              loopStructure[STOPS[DAVIS]].eta.bus = stop.Estimates[0].VehicleID;
             }
             break;
           case 'Diamond':
-            curFastest = loopStructure[STOPS[DIAMOND]];
+            curFastest = loopStructure[STOPS[DIAMOND]].eta.time;
             estimatedTimeForBus = stop.Estimates[0].SecondsToStop;
 
-            if (curFastest > estimatedTimeForBus) {
-              loopStructure[STOPS[DIAMOND]] = estimatedTimeForBus;
+            if (loopStructure[STOPS[DIAMOND]].ticks == -1 ||
+                curFastest > estimatedTimeForBus) {
+              loopStructure[STOPS[DIAMOND]].eta.time = estimatedTimeForBus;
+              loopStructure[STOPS[DIAMOND]].eta.bus =
+                  stop.Estimates[0].VehicleID;
             }
             break;
           case 'Eustis and Cotter':
-            curFastest = loopStructure[STOPS[COTTER]];
+            curFastest = loopStructure[STOPS[COTTER]].eta.time;
             estimatedTimeForBus = stop.Estimates[0].SecondsToStop;
 
-            if (curFastest > estimatedTimeForBus) {
-              loopStructure[STOPS[COTTER]] = estimatedTimeForBus;
+            if (loopStructure[STOPS[COTTER]].ticks == -1 ||
+                curFastest > estimatedTimeForBus) {
+              loopStructure[STOPS[COTTER]].eta.time = estimatedTimeForBus;
+              loopStructure[STOPS[COTTER]].eta.bus =
+                  stop.Estimates[0].VehicleID;
             }
             break;
         }
       });
     });
-  }, interval);
+    busTimeEstimateState = loopStructure;
 
-  busTimeEstimateState = loopStructure;
+    callback(updateTicks());
+  }, interval);
 };
 
 module.exports = {
   initUpdateLoop,
-  getEstimatesState,
+  getEstimateForStop,
 }

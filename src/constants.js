@@ -1,5 +1,5 @@
 // TODO: make this not hard coded
-const STOPS = ['ALFOND COMMONDS', 'DAVIS', 'DIAMOND', 'COTTER'];
+const STOPS = ['DOWNTOWN', 'DAVIS', 'DIAMOND', 'COTTER'];
 const ALFOND_COMMONS = 0;
 const DAVIS = 1;
 const DIAMOND = 2;
