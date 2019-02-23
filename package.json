@@ -7,7 +7,7 @@
   "author": "robertDurst <rsdurst@colby.edu>",
   "license": "MIT",
   "private": false,
-  "script": {
+  "scripts": {
     "start": "node src/server.js"
   },
   "dependencies": {
