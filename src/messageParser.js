@@ -39,7 +39,7 @@ const parseMessage = (message) => {
             currentLocation = location.DIAMOND;
             break;
           case 'DAVIS':
-            currentLocation = localStorage.DAVIS;
+            currentLocation = location.DAVIS;
             break;
         }
       }
