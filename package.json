@@ -9,7 +9,7 @@
   "private": false,
   "script": {
     "start": "node src/server.js"
-  }
+  },
   "dependencies": {
     "maverick": "https://github.com/hackseshfridays/maverick.git",
     "body-parser": "^1.18.3",
